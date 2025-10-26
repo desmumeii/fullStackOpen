@@ -2,17 +2,17 @@ import { useEffect, useState } from 'react'
 import Filter from './components/Filter.jsx';
 import PersonForm from './components/PersonForm.jsx';
 import Numbers from './components/Numbers.jsx';
-import axios from 'axios';
+import phonebookService from './services/phonebook.js';
 
 const App = () => {
   const [persons, setPersons] = useState([])
   const [filter, setFilter] = useState('')
 
   useEffect(() => {
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response => {
-        setPersons(response.data)
+    phonebookService
+      .getAll()
+      .then(data => {
+        setPersons(data)
       })
   }, [])
   
@@ -33,7 +33,7 @@ const App = () => {
         <PersonForm person={persons} setPerson={setPersons} />
       <h2>Numbers</h2>
       <div>
-        <Numbers persons={namesToShow} />
+        <Numbers persons={namesToShow} setPersons={setPersons} />
       </div>
     </div>
   )

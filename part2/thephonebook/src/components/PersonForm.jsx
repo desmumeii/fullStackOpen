@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import phonebookService from '../services/phonebook.js';
 
 const PersonForm = ({ person, setPerson }) => {
   const [newName, setNewName] = useState('')
@@ -14,14 +15,30 @@ const PersonForm = ({ person, setPerson }) => {
       setPerson(person.concat(personObject))
     }
     else {
-      alert(`${newName} is already added to phonebook`)
+      if (window.confirm(`"${newName}" is already added to phonebook, replace the old number with a new one?`)) {
+        confirmUpdate()
+      }
+      return
     }
     setNewName('')
     setNewNumber('')
-    console.log(newName);
-    console.log(newNumber);
+    phonebookService
+      .create(personObject)
+      .then(data => {
+        setPerson(person.concat(data))
+      })
   }
-
+  const confirmUpdate = () => {
+    const personToUpdate = person.find(p => p.name === newName)
+    const updatedPerson = { ...personToUpdate, number: newNumber }
+    setNewName('')
+    setNewNumber('')
+    phonebookService
+      .update(personToUpdate.id, updatedPerson)
+      .then(data => {
+        setPerson(person.map(p => p.id !== personToUpdate.id ? p : data))
+      })
+  }
   return (
     <form onSubmit={addName}>
         <div>
