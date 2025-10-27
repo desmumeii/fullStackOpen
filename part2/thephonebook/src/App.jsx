@@ -40,7 +40,7 @@ const App = () => {
         />
       </div>
       <h2>Add a new</h2>
-        <PersonForm person={persons} setPerson={setPersons} showNotification={showNotification} />
+        <PersonForm person={persons} setPersons={setPersons} showNotification={showNotification} />
       <h2>Numbers</h2>
       <div>
         <Numbers persons={namesToShow} setPersons={setPersons} />

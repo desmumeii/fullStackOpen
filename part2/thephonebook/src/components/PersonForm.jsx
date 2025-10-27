@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import phonebookService from '../services/phonebook.js';
 
-const PersonForm = ({ person, setPerson, showNotification }) => {
+const PersonForm = ({ persons, setPersons, showNotification }) => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
 
@@ -11,9 +11,9 @@ const PersonForm = ({ person, setPerson, showNotification }) => {
       name: newName,
       number: newNumber
     }
-    if (!person.find(p => p.name === newName)) {
+    if (!persons.find(p => p.name === newName)) {
       showNotification(`Added ${newName}`)
-      setPerson(person.concat(personObject))
+      setPersons(persons.concat(personObject))
     }
     else {
       if (window.confirm(`"${newName}" is already added to phonebook, replace the old number with a new one?`)) {
@@ -27,22 +27,22 @@ const PersonForm = ({ person, setPerson, showNotification }) => {
     phonebookService
       .create(personObject)
       .then(data => {
-        setPerson(person.concat(data))
+        setPersons(persons.concat(data))
       })
   }
   const confirmUpdate = () => {
-    const personToUpdate = person.find(p => p.name === newName)
+    const personToUpdate = persons.find(p => p.name === newName)
     const updatedPerson = { ...personToUpdate, number: newNumber }
     setNewName('')
     setNewNumber('')
     phonebookService
       .update(personToUpdate.id, updatedPerson)
       .then(data => {
-        setPerson(person.map(p => p.id !== personToUpdate.id ? p : data))
+        setPersons(persons.map(p => p.id !== personToUpdate.id ? p : data))
       })
       .catch ( error => {
         showNotification(`Information of ${newName} has already been removed from server`, 'error')
-        setPerson(person.filter(p => p.id !== personToUpdate.id))
+        setPersons(persons.filter(p => p.id !== personToUpdate.id))
       })
   }
   return (
