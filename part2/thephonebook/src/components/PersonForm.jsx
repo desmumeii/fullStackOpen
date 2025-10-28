@@ -11,9 +11,9 @@ const PersonForm = ({ persons, setPersons, showNotification }) => {
       name: newName,
       number: newNumber
     }
-    if (!persons.find(p => p.name === newName)) {
+    if (!persons?.find(p => p.name === newName)) {
       showNotification(`Added ${newName}`)
-      setPersons(persons.concat(personObject))
+      setPersons(prev => prev.concat(personObject))
     }
     else {
       if (window.confirm(`"${newName}" is already added to phonebook, replace the old number with a new one?`)) {
@@ -26,12 +26,11 @@ const PersonForm = ({ persons, setPersons, showNotification }) => {
     setNewNumber('')
     phonebookService
       .create(personObject)
-      .then(data => {
-        setPersons(persons.concat(data))
-      })
+      .then(data => setPersons(prev => prev.concat(data)))
   }
   const confirmUpdate = () => {
     const personToUpdate = persons.find(p => p.name === newName)
+    if (!personToUpdate) return
     const updatedPerson = { ...personToUpdate, number: newNumber }
     setNewName('')
     setNewNumber('')

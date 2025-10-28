@@ -10,11 +10,12 @@ const Numbers = ({ persons, setPersons }) => {
       })
   }
   const confirmRemove = (id) => {
-    if (window.confirm(`Delete ${persons.find(p => p.id === id).name}?`)) {
+    const person = persons?.find(p => p.id === id)
+    if (!person) return
+    if (window.confirm(`Delete ${person.name}?`)) {
       removeName(id)
     }
-  }
-
+}
   const toggleRemove = (id) => {
     return (
       <button onClick={() => confirmRemove(id)}>delete</button>
