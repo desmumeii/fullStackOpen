@@ -1,6 +1,6 @@
 import phonebookService from '../services/phonebook.js';
 
-const Numbers = ({ persons, setPersons }) => {
+const Numbers = ({ persons, setPersons, showNotification }) => {
 
   const removeName = (id) => {
     phonebookService
@@ -14,6 +14,7 @@ const Numbers = ({ persons, setPersons }) => {
     if (!person) return
     if (window.confirm(`Delete ${person.name}?`)) {
       removeName(id)
+      showNotification(`Deleted ${person.name}`)
     }
 }
   const toggleRemove = (id) => {

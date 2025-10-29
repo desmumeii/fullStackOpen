@@ -40,10 +40,10 @@ const App = () => {
         />
       </div>
       <h2>Add a new</h2>
-        <PersonForm person={persons} setPersons={setPersons} showNotification={showNotification} />
+        <PersonForm persons={persons} setPersons={setPersons} showNotification={showNotification} />
       <h2>Numbers</h2>
       <div>
-        <Numbers persons={namesToShow} setPersons={setPersons} />
+        <Numbers persons={namesToShow} setPersons={setPersons} showNotification={showNotification} />
       </div>
     </div>
   )

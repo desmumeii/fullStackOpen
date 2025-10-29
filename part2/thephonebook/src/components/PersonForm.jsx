@@ -7,41 +7,46 @@ const PersonForm = ({ persons, setPersons, showNotification }) => {
 
   const addName = (event) => {
     event.preventDefault()
+    console.log('get to addname')
+    const existingPerson = persons?.find(p => p.name === newName)
+    if (existingPerson) {
+      console.log('existing person found')
+      if (window.confirm(`"${newName}" is already added to phonebook, replace the old number with a new one?`)) {
+        confirmUpdate(existingPerson)
+      }
+      return
+    }
+    console.log('creating new person,out of check')
     const personObject = {
       name: newName,
       number: newNumber
     }
-    if (!persons?.find(p => p.name === newName)) {
-      showNotification(`Added ${newName}`)
-      setPersons(prev => prev.concat(personObject))
-    }
-    else {
-      if (window.confirm(`"${newName}" is already added to phonebook, replace the old number with a new one?`)) {
-        showNotification(`Updated ${newName}'s number`)
-        confirmUpdate()
-      }
-      return
-    }
-    setNewName('')
-    setNewNumber('')
+
     phonebookService
       .create(personObject)
-      .then(data => setPersons(prev => prev.concat(data)))
+      .then(savedPerson => {
+        setPersons(prev => prev.concat(savedPerson))
+        showNotification(`Added ${savedPerson.name}`)
+        setNewName('')
+        setNewNumber('')
+      })
   }
-  const confirmUpdate = () => {
-    const personToUpdate = persons.find(p => p.name === newName)
-    if (!personToUpdate) return
-    const updatedPerson = { ...personToUpdate, number: newNumber }
-    setNewName('')
-    setNewNumber('')
+
+  const confirmUpdate = (existingPerson) => {
+    const updatedPerson = { ...existingPerson, number: newNumber }
     phonebookService
-      .update(personToUpdate.id, updatedPerson)
+      .update(existingPerson.id, updatedPerson)
       .then(data => {
-        setPersons(persons.map(p => p.id !== personToUpdate.id ? p : data))
+        setPersons(persons.map(p => p.id !== existingPerson.id ? p : data))
+        showNotification(`Updated ${data.name}`)
+        setNewName('')
+        setNewNumber('')
       })
       .catch ( error => {
         showNotification(`Information of ${newName} has already been removed from server`, 'error')
-        setPersons(persons.filter(p => p.id !== personToUpdate.id))
+        setPersons(persons.filter(p => p.id !== existingPerson.id))
+        setNewName('')
+        setNewNumber('')
       })
   }
   return (
