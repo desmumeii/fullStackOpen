@@ -24,30 +24,30 @@ if (process.argv.length === 3) {
     mongoose.connection.close()
   })
 } else {
-    const password = process.argv[2]
-    const personName = process.argv[3]
-    const personNumber = process.argv[4]
+  const password = process.argv[2]
+  const personName = process.argv[3]
+  const personNumber = process.argv[4]
 
-    const url = `mongodb+srv://fullstack:${password}@cluster0.lzlqgnc.mongodb.net/phoneBook?appName=Cluster0`
+  const url = `mongodb+srv://fullstack:${password}@cluster0.lzlqgnc.mongodb.net/phoneBook?appName=Cluster0`
 
-    mongoose.set('strictQuery',false)
+  mongoose.set('strictQuery',false)
 
-    mongoose.connect(url)
+  mongoose.connect(url)
 
-    const personSchema = new mongoose.Schema({
-      name: String,
-      number: String,
-    })
+  const personSchema = new mongoose.Schema({
+    name: String,
+    number: String,
+  })
 
-    const Person = mongoose.model('Person', personSchema)
+  const Person = mongoose.model('Person', personSchema)
 
-    const person = new Person({
-      name: personName,
-      number: personNumber,
-    })
+  const person = new Person({
+    name: personName,
+    number: personNumber,
+  })
 
-    person.save().then(result => {
-      console.log('person saved!')
-      mongoose.connection.close()
-    })
+  person.save().then(() => {
+    console.log('person saved!')
+    mongoose.connection.close()
+  })
 }
