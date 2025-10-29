@@ -30,6 +30,16 @@ const PersonForm = ({ persons, setPersons, showNotification }) => {
         setNewName('')
         setNewNumber('')
       })
+      .catch ( error => {
+        if (error.response) {
+          if (error.response.status === 400) {
+            showNotification(error.response.data.error, 'error')
+            setNewName('')
+            setNewNumber('')
+            return
+          }
+        }
+      })
   }
 
   const confirmUpdate = (existingPerson) => {
@@ -43,10 +53,21 @@ const PersonForm = ({ persons, setPersons, showNotification }) => {
         setNewNumber('')
       })
       .catch ( error => {
-        showNotification(`Information of ${newName} has already been removed from server`, 'error')
-        setPersons(persons.filter(p => p.id !== existingPerson.id))
-        setNewName('')
-        setNewNumber('')
+        if (error.response) {
+          if (error.response.status === 400) {
+            showNotification(error.response.data.error, 'error')
+            setNewName('')
+            setNewNumber('')
+            return
+          }
+          else if (error.response.status === 404) {
+            showNotification(`Information of ${newName} has already been removed from server`, 'error')
+            setPersons(persons.filter(p => p.id !== existingPerson.id))
+            setNewName('')
+            setNewNumber('')
+            return
+          }
+        }
       })
   }
   return (
