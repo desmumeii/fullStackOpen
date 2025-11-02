@@ -5,12 +5,24 @@ const supertest = require('supertest')
 const app = require('../app')
 const helper = require('./test_helper')
 const Blog = require('../models/blog')
-
+const User = require('../models/user')
+const bcrypt = require ('bcrypt')
 const api = supertest(app)
 
 beforeEach(async () => {
   await Blog.deleteMany({})
   await Blog.insertMany(helper.initialBlogs)
+
+  await User.deleteMany({})
+  for (const user of helper.initialUsers) {
+    const passwordHash = await bcrypt.hash(user.password, 10)
+    const userObject = new User({
+      username: user.username,
+      name: user.name,
+      passwordHash
+    })
+    await userObject.save()
+  }
 })
 
 test('blogs are returned as json', async () => {
@@ -37,25 +49,32 @@ test('unique identifier property of the blog posts is named id', async () => {
   }
 })
 
-test('a valid blog can be added', async () => {
+test.only('a valid blog can be added', async () => {
   const newBlog = {
-    title: "Async/Await simplifies making async calls",
+    title: "New Blog Post",
     author: "John Doe",
-    url: "http://example.com/async-await",
-    likes: 15
+    url: "http://example.com/new-blog-post",
+    likes: 10
   }
   
+  const loginResponse = await api
+    .post('/api/login')
+    .send({
+      username: "root",
+      password: "salainen"
+    })
+  const token = loginResponse.body.token
+
   await api
     .post('/api/blogs')
+    .set('Authorization', `Bearer ${token}`)
     .send(newBlog)
     .expect(201)
     .expect('Content-Type', /application\/json/)
-  
+
   const blogsAtEnd = await helper.blogsInDb()
   assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length + 1)
-
-  const titles = blogsAtEnd.map(blog => blog.title)
-  assert.ok(titles.includes(newBlog.title))
+  assert.ok(blogsAtEnd.map(blog => blog.title).includes(newBlog.title))
 })
 
 test('if likes property is missing, it will default to 0', async () => {
@@ -91,7 +110,7 @@ test('blog without title and url is not added', async () => {
     assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length)
 })
 
-test.only('a blog can be deleted', async () => {
+test('a blog can be deleted', async () => {
   const blogsAtStart = await helper.blogsInDb()
   const blogToDelete = blogsAtStart[0]
 
@@ -104,7 +123,7 @@ test.only('a blog can be deleted', async () => {
   assert.ok(!blogsAtEnd.map(blog => blog.id).includes(blogToDelete.id))
 })
 
-test.only('a blog can be updated', async () => {
+test('a blog can be updated', async () => {
   const blogsAtStart = await helper.blogsInDb()
   const blogToUpdate = blogsAtStart[0]
 
@@ -128,4 +147,21 @@ test.only('a blog can be updated', async () => {
 
 after(async () => {
   await mongoose.connection.close()
+})
+
+test.only('blog without token is not added', async () => {
+  const newBlog = {
+    title: "No Token Blog",
+    author: "John Doe",
+    url: "http://example.com/no-token-blog",
+    likes: 5
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(401)
+
+  const blogsAtEnd = await helper.blogsInDb()
+  assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length)
 })
