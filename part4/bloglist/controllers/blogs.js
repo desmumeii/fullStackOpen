@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken')
 const { userExtractor } = require('../utils/middleware')
 
 blogRouter.get('/', async (request, response) => {
-  const blogs = await Blog.find({})
+  const blogs = await Blog.find({}).populate('user', { username: 1, name: 1 })
   response.json(blogs)
 })
 
@@ -28,7 +28,9 @@ blogRouter.post('/', userExtractor, async (request, response) => {
   const savedBlog = await blog.save()
   user.blogs = (user.blogs || []).concat(savedBlog._id)
   await user.save()
-  response.status(201).json(savedBlog)
+
+  const populatedBlog = await Blog.findById(savedBlog._id).populate('user', { username: 1, name: 1 })
+  response.status(201).json(populatedBlog)
 })
 
 blogRouter.delete('/:id', async (request, response) => {
@@ -42,7 +44,9 @@ blogRouter.delete('/:id', async (request, response) => {
   if (!user) {
     return response.status(400).json({ error: 'invalid user id' })
   }
-  if (!Blog.user.toString() === user.id.toString()) {
+
+  const blog = await Blog.findById(request.params.id)
+  if (blog.user.toString() !== user.id.toString()) {
     return response.status(403).json({ error: 'only the creator can delete a blog' })
   }
 
@@ -62,7 +66,12 @@ blogRouter.put('/:id', async (request, response) => {
     likes: body.likes,
   }
 
-  const result = await Blog.findByIdAndUpdate(id, updatedBlog, { new: true })
+  let result = await Blog.findByIdAndUpdate(id, updatedBlog, { 
+    new: true,
+    runValidators: true,
+  })
+  
+  result = await result.populate('user', { username: 1, name: 1 })
   response.json(result)
 })
 
