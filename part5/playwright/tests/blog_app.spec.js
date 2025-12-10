@@ -112,33 +112,18 @@ describe('Blog app', () => {
       await createBlog(page, 'Medium liked blog', 'Author2', 'http://example.com/medium-liked')
       await createBlog(page, 'Most liked blog', 'Author3', 'http://example.com/most-liked')
 
-      await page.getByRole('button', { name: 'view' }).first().click();
-      await page.waitForTimeout(500); // wait for blog content to expand
+      await page.getByRole('button', { name: 'view' }).nth(1).click();
 
       await page.getByRole('button', { name: 'like' }).click();
-      await page.waitForTimeout(500); // wait for like to register
+      await page.waitForTimeout(100);
 
-      await page.getByRole('button', { name: 'view' }).first().click();
-      await page.waitForTimeout(500);
-
-      await page.getByRole('button', { name: 'like' }).nth(1).click();
-      await page.waitForTimeout(500);
+      await page.getByRole('button', { name: 'view' }).nth(1).click();
 
       await page.getByRole('button', { name: 'like' }).nth(1).click();
-      await page.waitForTimeout(500);
-
-      await page.getByRole('button', { name: 'view' }).click();
-      await page.waitForTimeout(500);
-
-      await page.getByRole('button', { name: 'like' }).nth(2).click();
-      await page.waitForTimeout(500);
-
-      await page.getByRole('button', { name: 'like' }).nth(2).click();
-      await page.waitForTimeout(500);
+      await page.waitForTimeout(100);
 
       await page.getByRole('button', { name: 'like' }).nth(1).click();
-      await page.waitForTimeout(500);
-      
+
       const blogs = page.locator('.blog')
       await expect(blogs.nth(0)).toHaveText(/Most liked blog/)
       await expect(blogs.nth(1)).toHaveText(/Medium liked blog/)
