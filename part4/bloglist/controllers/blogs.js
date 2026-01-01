@@ -3,6 +3,7 @@ const Blog = require('../models/blog')
 const User = require('../models/user')
 const jwt = require('jsonwebtoken')
 const { userExtractor } = require('../utils/middleware')
+const blog = require('../models/blog')
 
 blogRouter.get('/', async (request, response) => {
   const blogs = await Blog.find({}).populate('user', { username: 1, name: 1 })
@@ -73,6 +74,25 @@ blogRouter.put('/:id', async (request, response) => {
   
   result = await result.populate('user', { username: 1, name: 1 })
   response.json(result)
+})
+
+blogRouter.post('/:id/comments', async (request, response) => {
+  const { comment } = request.body
+  const { id } = request.params
+  if (!comment) {
+    return response.status(400).json({ error: 'comment is required' })
+  }
+  const blog = await Blog.findById(id)
+  if (!blog) {
+    return response.status(404).json({ error: 'blog not found' })
+  }
+  blog.comments = blog.comments.concat(comment)
+  const updatedBlog = await blog.save()
+
+  const populatedBlog = await Blog
+    .findById(updatedBlog._id)
+    .populate('user', { username: 1, name: 1 })
+  response.status(201).json(populatedBlog)
 })
 
 module.exports = blogRouter
